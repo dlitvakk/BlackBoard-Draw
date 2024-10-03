@@ -92,12 +92,41 @@ struct Board {
             }
         }
     }
+
+    void drawRectangle(int x, int y, int width, int height) {
+        if (width <= 0 || height <= 0) return;
+        // draw top and bottom lines
+        for (int i = 0; i < width; ++i) {
+            int posX = x + i;
+            if (posX >= 0 && posX < BOARD_WIDTH) {
+                if (y >= 0 && y < BOARD_HEIGHT) {
+                    grid[y][posX] = '*';
+                }
+                if (y + height - 1 >= 0 && y + height - 1 < BOARD_HEIGHT) {
+                    grid[y + height - 1][posX] = '*';
+                }
+            }
+        }
+        // draw left and right lines
+        for (int i = 0; i < height; ++i) {
+            int posY = y + i;
+            if (posY >= 0 && posY < BOARD_HEIGHT) {
+                if (x >= 0 && x < BOARD_WIDTH) {
+                    grid[posY][x] = '*';
+                }
+                if (x + width - 1 >= 0 && x + width - 1 < BOARD_WIDTH) {
+                    grid[posY][x + width - 1] = '*';
+                }
+            }
+        }
+    }
 };
 int main() {
     Board board;
-    //board.drawTriangle(15, 15, 10);
-    //board.drawRhombus(25, 25, 10);
+    board.drawTriangle(15, 15, 10);
+    board.drawRhombus(25, 25, 10);
     board.drawCircle(25, 5, 5);
+    board.drawRectangle(10, 10, 10, 20);
     board.print();
     return 0;
 }
