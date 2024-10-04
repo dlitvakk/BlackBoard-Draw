@@ -15,6 +15,29 @@ struct Board {
             std::cout << "\n";
         }
     }
+
+};
+
+/*
+Figure
+
+unique id
+type
+parameters (info)
+draw method
+board (grid)
+ */
+
+class Figure {
+    int id;
+    std::string type;
+    std::vector<int> info;
+    std::vector<std::vector <char>>& grid;
+
+public:
+    Figure(int id, std::string type, const std::vector<int> &info, std::vector<std::vector <char>>& grid)
+        : id(id), type(std::move(type)), info(info), grid(grid) {}
+
     void drawTriangle(int x, int y, int height) {
         if (height <= 0) return;
         for (int i = 0; i < height; ++i) {
@@ -39,6 +62,7 @@ struct Board {
                 grid[baseY][baseX] = '*';
         }
     }
+
     void drawRhombus(int x, int y, int height) {
         if (height <= 0) return;
         if (height % 2 != 0) {
@@ -95,7 +119,7 @@ struct Board {
 
     void drawRectangle(int x, int y, int width, int height) {
         if (width <= 0 || height <= 0) return;
-        // draw top and bottom lines
+
         for (int i = 0; i < width; ++i) {
             int posX = x + i;
             if (posX >= 0 && posX < BOARD_WIDTH) {
@@ -107,7 +131,7 @@ struct Board {
                 }
             }
         }
-        // draw left and right lines
+
         for (int i = 0; i < height; ++i) {
             int posY = y + i;
             if (posY >= 0 && posY < BOARD_HEIGHT) {
@@ -120,13 +144,30 @@ struct Board {
             }
         }
     }
+
+    void draw() {
+        if (type == "triangle") drawTriangle(info[0], info[1], info[2]);
+        else if (type == "rhombus") drawRhombus(info[0], info[1], info[2]);
+        else if (type == "circle") drawCircle(info[0], info[1], info[2]);
+        else if (type == "rectangle") drawRectangle(info[0], info[1], info[2], info[3]);
+        else std::cout << "Unknown figure type with ID " << id << std::endl;
+    }
 };
+
+
 int main() {
     Board board;
-    board.drawTriangle(15, 15, 10);
-    board.drawRhombus(25, 25, 10);
-    board.drawCircle(25, 5, 5);
-    board.drawRectangle(10, 10, 10, 20);
+    std::unique_ptr<Figure> figure1 = std::make_unique<Figure>(1, "triangle", std::vector<int>{15, 15, 10}, board.grid);
+    figure1->draw();
+    std::unique_ptr<Figure> figure2 = std::make_unique<Figure>(2, "rhombus", std::vector<int>{25, 25, 10}, board.grid);
+    figure2->draw();
+    std::unique_ptr<Figure> figure3 = std::make_unique<Figure>(3, "circle", std::vector<int>{25, 5, 5}, board.grid);
+    figure3->draw();
+    std::unique_ptr<Figure> figure4 = std::make_unique<Figure>(4, "rectangle", std::vector<int>{10, 10, 10, 20}, board.grid);
+    figure4->draw();
+    std::unique_ptr<Figure> figure5 = std::make_unique<Figure>(5, "diamond", std::vector<int>{10, 10, 10}, board.grid);
+    figure5->draw();
     board.print();
+
     return 0;
 }
