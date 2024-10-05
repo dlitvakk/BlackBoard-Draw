@@ -29,16 +29,34 @@ board (grid)
  */
 
 class Figure {
+protected:
+
     int id;
     std::string type;
     std::vector<int> info;
     std::vector<std::vector <char>>& grid;
 
 public:
+    virtual ~Figure() = default;
+
     Figure(int id, std::string type, const std::vector<int> &info, std::vector<std::vector <char>>& grid)
         : id(id), type(std::move(type)), info(info), grid(grid) {}
 
-    void drawTriangle(int x, int y, int height) {
+    virtual void draw() {
+        std::cout << "Drawing non-existing shape!" << std::endl;
+        std::cout << "  /\\_/\\\n";
+        std::cout << " ( o.o )\n";
+        std::cout << "  > ^ <\n";
+    }
+};
+
+class Triangle : public Figure {
+public:
+    ~Triangle() override = default;
+    Triangle(int id, const std::vector<int> &info, std::vector<std::vector <char>>& grid)
+        : Figure(id, "triangle", info, grid) {}
+    void draw() override {
+        int x = info[0], y = info[1], height = info[2];
         if (height <= 0) return;
         for (int i = 0; i < height; ++i) {
             int leftMost = x - i;
@@ -62,8 +80,15 @@ public:
                 grid[baseY][baseX] = '*';
         }
     }
+};
 
-    void drawRhombus(int x, int y, int height) {
+class Rhombus : public Figure {
+public:
+    ~Rhombus() override = default;
+    Rhombus(int id, const std::vector<int> &info, std::vector<std::vector <char>>& grid)
+        : Figure(id, "rhombus", info, grid) {}
+    void draw() override {
+        int x = info[0], y = info[1], height = info[2];
         if (height <= 0) return;
         if (height % 2 != 0) {
             std::cout << "Please, enter valid height for rhombus. Height should be even number." << std::endl;
@@ -96,8 +121,15 @@ public:
             }
         }
     }
+};
 
-    void drawCircle(int x, int y, int radius) {
+class Circle : public Figure {
+public:
+    ~Circle() override = default;
+    Circle(int id, const std::vector<int> &info, std::vector<std::vector <char>>& grid)
+        : Figure(id, "circle", info, grid) {}
+    void draw() override {
+        int x = info[0], y = info[1], radius = info[2];
         if (radius <= 0) return;
         for (int i = -radius; i <= radius; ++i) {
             int posY = y + i + radius;
@@ -116,8 +148,15 @@ public:
             }
         }
     }
+};
 
-    void drawRectangle(int x, int y, int width, int height) {
+class Rectangle : public Figure {
+public:
+    ~Rectangle() override = default;
+    Rectangle(int id, const std::vector<int> &info, std::vector<std::vector <char>>& grid)
+        : Figure(id, "rectangle", info, grid) {}
+    void draw() override {
+        int x = info[0], y = info[1], width = info[2], height = info[3];
         if (width <= 0 || height <= 0) return;
 
         for (int i = 0; i < width; ++i) {
@@ -144,29 +183,32 @@ public:
             }
         }
     }
-
-    void draw() {
-        if (type == "triangle") drawTriangle(info[0], info[1], info[2]);
-        else if (type == "rhombus") drawRhombus(info[0], info[1], info[2]);
-        else if (type == "circle") drawCircle(info[0], info[1], info[2]);
-        else if (type == "rectangle") drawRectangle(info[0], info[1], info[2], info[3]);
-        else std::cout << "Unknown figure type with ID " << id << std::endl;
-    }
 };
-
-
 int main() {
     Board board;
-    std::unique_ptr<Figure> figure1 = std::make_unique<Figure>(1, "triangle", std::vector<int>{15, 15, 10}, board.grid);
-    figure1->draw();
-    std::unique_ptr<Figure> figure2 = std::make_unique<Figure>(2, "rhombus", std::vector<int>{25, 25, 10}, board.grid);
-    figure2->draw();
-    std::unique_ptr<Figure> figure3 = std::make_unique<Figure>(3, "circle", std::vector<int>{25, 5, 5}, board.grid);
-    figure3->draw();
-    std::unique_ptr<Figure> figure4 = std::make_unique<Figure>(4, "rectangle", std::vector<int>{10, 10, 10, 20}, board.grid);
-    figure4->draw();
-    std::unique_ptr<Figure> figure5 = std::make_unique<Figure>(5, "diamond", std::vector<int>{10, 10, 10}, board.grid);
-    figure5->draw();
+    std::vector<std::unique_ptr<Figure>> figures;
+    std::unique_ptr<Triangle> tr1 = std::make_unique<Triangle>(1, std::vector<int>{10, 1, 5}, board.grid);
+    figures.push_back(std::move(tr1));
+    std::unique_ptr<Triangle> tr2 = std::make_unique<Triangle>(2, std::vector<int>{30, 12, 10}, board.grid);
+    figures.push_back(std::move(tr2));
+
+    std::unique_ptr<Rhombus> r1 = std::make_unique<Rhombus>(3, std::vector<int>{50, 10, 10}, board.grid);
+    figures.push_back(std::move(r1));
+
+    std::unique_ptr<Circle> c1 = std::make_unique<Circle>(4, std::vector<int>{70, 5, 5}, board.grid);
+    figures.push_back(std::move(c1));
+    std::unique_ptr<Rhombus> r2 = std::make_unique<Rhombus>(5, std::vector<int>{90, 15, 2}, board.grid);
+    figures.push_back(std::move(r2));
+
+    std::unique_ptr<Rectangle> rec1 = std::make_unique<Rectangle>(6, std::vector<int>{90, 20, 10, 55}, board.grid);
+    figures.push_back(std::move(rec1));
+
+
+
+    for (const auto& figure : figures) {
+        figure->draw();
+    }
+
     board.print();
 
     return 0;
