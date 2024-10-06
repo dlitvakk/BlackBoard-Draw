@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 const int BOARD_WIDTH = 100;
 const int BOARD_HEIGHT = 40;
@@ -23,6 +24,52 @@ struct Board {
             }
         }
     }
+
+     void save(const std::string& filePath) {
+        std::fstream file(filePath);
+        if (!file) {
+            std::cout << "Error opening file!" << std::endl;
+            return;
+        }
+        for (auto& row : grid) {
+            for (char c : row) {
+                file << c;
+            }
+            file << "\n";
+        }
+        file.close();
+        std::cout << "The board is succesfully saved." << std::endl;
+    }
+
+    void load(const std::string& filePath) {
+        // std::vector<std::vector<char>> tempGrid(BOARD_HEIGHT, std::vector<char>(BOARD_WIDTH, ' '));
+        std::fstream file(filePath);
+        std::string line;
+        std::vector <char> row;
+        if (!file) {
+            std::cout << "Error opening file!" << std::endl;
+            return;
+        }
+        grid = {};
+
+        while (std::getline(file, line)) {
+            row = {};
+            for (char c : line) {
+                row.push_back(c);
+            }
+            grid.push_back(row);
+        }
+        const int tempGridHeight = grid.size();
+        const int tempGridWidth = grid[0].size();
+        if (tempGridWidth != BOARD_WIDTH && tempGridHeight != BOARD_HEIGHT) {
+            std::cout << "Invalid board size!" << std::endl;
+            return;
+        }
+        file.close();
+        std::cout << "The board is succesfully loaded." << std::endl;
+        // grid = tempGrid;
+    }
+
 };
 
 /*
@@ -36,7 +83,7 @@ board (grid)
  */
 
 class Figure {
-protected:
+public:
 
     int id;
     std::string type;
@@ -242,8 +289,37 @@ public:
         }
     }
 
+    static bool validation(const std::string &type, const std::vector<int> &info) {
+        if (type != "triangle" && type != "rhombus" && type != "circle" && type != "rectangle") {
+            std::cout << "Invalid shape type!" << std::endl;
+            return false;
+        }
+        if (type == "rectangle" && info.size() != 4) {
+            std::cout << "Invalid number of parameters for rectangle!" << std::endl;
+            return false;
+        }
+        if (type != "rectangle" && info.size() != 3) {
+            std::cout << "Invalid number of parameters for " << type << "!" << std::endl;
+            return false;
+        }
+        if (type == "rhombus" && info[2] % 2 != 0) {
+            std::cout << "Please, enter valid height for rhombus. Height should be even number." << std::endl;
+            return false;
+        }
+        if (info[0] < 0 || info[0] >= BOARD_WIDTH || info[1] < 0 || info[1] >= BOARD_HEIGHT) {
+            std::cout << "The shape is out of scope. Try again!" << std::endl;
+            return false;
+        }
+        for (const auto& figure: figures) {
+            if (figure->type == type && figure->info == info) {
+                std::cout << "The shape is already added!" << std::endl;
+                return false;
+            }
+        }
+        return true;
+    }
+
      void parseCommand(const std::string& command) {
-        if (command == "exit") exit(0);
         if (command == "draw") {
             for (const auto& figure : figures) {
                 figure->draw();
@@ -252,6 +328,9 @@ public:
         } else if (command == "list") {
             for (const auto& figure : figures) {
                 figure->getInfo();
+            }
+            if (figures.empty()) {
+                std::cout << "No shapes added yet!" << std::endl;
             }
         } else if (command == "shapes") {
             printShapes();
@@ -277,16 +356,30 @@ public:
                 }
             }
 
-            add(type, info);
+            if (validation(type, info) == true) {
+                add(type, info);
+                std::cout << "Shape is succesfully added." << std::endl;
+            };
         } else if (command == "clear") {
             figures.clear();
             board.clear();
+            std::cout << "The board is clear." << std::endl;
         } else if (command == "undo") {
             board = previousState;
             figures.pop_back();
             if (figures.empty()) {
                 board.clear();
             }
+            std::cout << "Last added shape is removed." << std::endl;
+        } else if (command == "save") {
+            std::string filePath;
+            std::cin >> filePath;
+            board.save(filePath);
+        } else if (command == "load") {
+            std::string filePath;
+            std::cin >> filePath;
+            board.load(filePath);
+            figures.clear();
         } else {
             std::cout << "Invalid command!" << std::endl;
         }
@@ -303,6 +396,7 @@ int main() {
     while (true) {
         std::string command;
         std::cin >> command;
+        if (command == "exit") break;
         parser.parseCommand(command);
     }
 }
