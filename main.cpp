@@ -48,6 +48,20 @@ public:
         std::cout << " ( o.o )\n";
         std::cout << "  > ^ <\n";
     }
+
+    void getInfo() const{
+        std::cout  << id << " " << type;
+        for (int i = 0; i < info.size(); ++i) {
+            if (i == 0) {
+                std::cout << " (" << info[i];
+            } else if (i == 1) {
+                std::cout << ", " << info[i] << ") ";
+            } else {
+                std::cout << " " << info[i];
+            }
+        }
+        std::cout << std::endl;
+    }
 };
 
 class Triangle : public Figure {
@@ -184,6 +198,7 @@ public:
         }
     }
 };
+
 int main() {
     Board board;
     std::vector<std::unique_ptr<Figure>> figures;
@@ -207,7 +222,13 @@ int main() {
 
     for (const auto& figure : figures) {
         figure->draw();
+
     }
+
+    for (const auto& figure : figures) {
+        figure->getInfo();
+    }
+
 
     board.print();
 
