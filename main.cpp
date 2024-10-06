@@ -209,6 +209,7 @@ public:
 class CommandParser {
     Board& board;
     static std::vector<std::unique_ptr<Figure>> figures;
+    Board previousState;
 
 public:
     explicit CommandParser(Board &board)
@@ -241,7 +242,7 @@ public:
         }
     }
 
-     void parseCommand(const std::string& command) const {
+     void parseCommand(const std::string& command) {
         if (command == "exit") exit(0);
         if (command == "draw") {
             for (const auto& figure : figures) {
@@ -255,6 +256,9 @@ public:
         } else if (command == "shapes") {
             printShapes();
         } else if (command == "add") {
+            // for undo operation, we can keep the previous state of the board
+            previousState = board;
+
             std::string type;
             std::cin >> type;
             std::vector<int> info;
@@ -277,6 +281,12 @@ public:
         } else if (command == "clear") {
             figures.clear();
             board.clear();
+        } else if (command == "undo") {
+            board = previousState;
+            figures.pop_back();
+            if (figures.empty()) {
+                board.clear();
+            }
         } else {
             std::cout << "Invalid command!" << std::endl;
         }
@@ -289,11 +299,10 @@ int main() {
     // std::vector<std::unique_ptr<Figure>> figures;
     CommandParser parser(board);
     std::cout << "Welcome to the blackboard drawing program!" << std::endl;
-    std::cout << "Enter one of the commands:\n <draw> for printing the board,\n <list> for showing all the added shapes,\n <shape> for all possible figures,\n <add> to adding a figure,\n <clear> to clear board,\n <exit>" << std::endl;
+    std::cout << "Enter one of the commands:\n <draw> for printing the board,\n <list> for showing all the added shapes,\n <shapes> for all possible figures,\n <add> to adding a figure,\n <clear> to clear board,\n <undo> for removing last added shape,\n <exit>" << std::endl;
     while (true) {
         std::string command;
         std::cin >> command;
         parser.parseCommand(command);
     }
-    return 0;
 }
