@@ -16,6 +16,13 @@ struct Board {
         }
     }
 
+    void clear() {
+        for (auto& row : grid) {
+            for (char& c : row) {
+                c = ' ';
+            }
+        }
+    }
 };
 
 /*
@@ -199,38 +206,94 @@ public:
     }
 };
 
+class CommandParser {
+    Board& board;
+    static std::vector<std::unique_ptr<Figure>> figures;
+
+public:
+    explicit CommandParser(Board &board)
+        : board(board) {
+    }
+
+    static void printShapes() {
+        std::cout << "The list of possible shapes:" << std::endl;
+        std::cout << "triangle <x> <y> <height>" << std::endl;
+        std::cout << "rhombus <x> <y> <height>" << std::endl;
+        std::cout << "circle <x> <y> <radius>" << std::endl;
+        std::cout << "rectangle <x> <y> <width> <height>" << std::endl;
+    }
+
+     void add(const std::string &type, const std::vector<int>& info) const {
+        if (type == "triangle") {
+            std::unique_ptr<Triangle> tr = std::make_unique<Triangle>(figures.size() + 1, info, board.grid);
+            figures.push_back(std::move(tr));
+        } else if (type == "rhombus") {
+            std::unique_ptr<Rhombus> r = std::make_unique<Rhombus>(figures.size() + 1, info, board.grid);
+            figures.push_back(std::move(r));
+        } else if (type == "circle") {
+            std::unique_ptr<Circle> c = std::make_unique<Circle>(figures.size() + 1, info, board.grid);
+            figures.push_back(std::move(c));
+        } else if (type == "rectangle") {
+            std::unique_ptr<Rectangle> rec = std::make_unique<Rectangle>(figures.size() + 1, info, board.grid);
+            figures.push_back(std::move(rec));
+        } else {
+            std::cout << "Invalid shape type!" << std::endl;
+        }
+    }
+
+     void parseCommand(const std::string& command) const {
+        if (command == "exit") exit(0);
+        if (command == "draw") {
+            for (const auto& figure : figures) {
+                figure->draw();
+            }
+            board.print();
+        } else if (command == "list") {
+            for (const auto& figure : figures) {
+                figure->getInfo();
+            }
+        } else if (command == "shapes") {
+            printShapes();
+        } else if (command == "add") {
+            std::string type;
+            std::cin >> type;
+            std::vector<int> info;
+            if (type == "rectangle") {
+                for (int i = 0; i < 4; ++i) {
+                    int val;
+                    std::cin >> val;
+                    info.push_back(val);
+                }
+            } else {
+                for (int i = 0; i < 3; ++i) {
+                    int val;
+                    std::cin >> val;
+                    info.push_back(val);
+
+                }
+            }
+
+            add(type, info);
+        } else if (command == "clear") {
+            figures.clear();
+            board.clear();
+        } else {
+            std::cout << "Invalid command!" << std::endl;
+        }
+    }
+};
+std::vector<std::unique_ptr<Figure>> CommandParser::figures;
+
 int main() {
     Board board;
-    std::vector<std::unique_ptr<Figure>> figures;
-    std::unique_ptr<Triangle> tr1 = std::make_unique<Triangle>(1, std::vector<int>{10, 1, 5}, board.grid);
-    figures.push_back(std::move(tr1));
-    std::unique_ptr<Triangle> tr2 = std::make_unique<Triangle>(2, std::vector<int>{30, 12, 10}, board.grid);
-    figures.push_back(std::move(tr2));
-
-    std::unique_ptr<Rhombus> r1 = std::make_unique<Rhombus>(3, std::vector<int>{50, 10, 10}, board.grid);
-    figures.push_back(std::move(r1));
-
-    std::unique_ptr<Circle> c1 = std::make_unique<Circle>(4, std::vector<int>{70, 5, 5}, board.grid);
-    figures.push_back(std::move(c1));
-    std::unique_ptr<Rhombus> r2 = std::make_unique<Rhombus>(5, std::vector<int>{90, 15, 2}, board.grid);
-    figures.push_back(std::move(r2));
-
-    std::unique_ptr<Rectangle> rec1 = std::make_unique<Rectangle>(6, std::vector<int>{90, 20, 10, 55}, board.grid);
-    figures.push_back(std::move(rec1));
-
-
-
-    for (const auto& figure : figures) {
-        figure->draw();
-
+    // std::vector<std::unique_ptr<Figure>> figures;
+    CommandParser parser(board);
+    std::cout << "Welcome to the blackboard drawing program!" << std::endl;
+    std::cout << "Enter one of the commands:\n <draw> for printing the board,\n <list> for showing all the added shapes,\n <shape> for all possible figures,\n <add> to adding a figure,\n <clear> to clear board,\n <exit>" << std::endl;
+    while (true) {
+        std::string command;
+        std::cin >> command;
+        parser.parseCommand(command);
     }
-
-    for (const auto& figure : figures) {
-        figure->getInfo();
-    }
-
-
-    board.print();
-
     return 0;
 }
