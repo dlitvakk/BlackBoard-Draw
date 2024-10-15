@@ -418,6 +418,28 @@ public:
         }
     }
 
+    // The selected shape is modified
+    // You cannot change the shape type
+    // You cannot make a valid shape an invalid
+    void edit(const int id, const int param) {
+        for (const auto& figure : figures) {
+            if (figure->id == id) {
+                figure->info[2] = param;
+                return;
+            }
+        }
+    }
+
+    void edit(const int id, const int param1, const int param2) {
+        for (const auto& figure : figures) {
+            if (figure->id == id) {
+                figure->info[2] = param1;
+                figure->info[3] = param2;
+                return;
+            }
+        }
+    }
+
      void add(const std::string &type, const std::string &mode, const std::string &color, const std::vector<int>& info) const {
         if (info[0] < 0 || info[0] >= BOARD_WIDTH || info[1] < 0 || info[1] >= BOARD_HEIGHT) {
             std::cout << "The shape is out of scope. Try again!" << std::endl;
@@ -512,6 +534,22 @@ public:
         } else if (command == "remove") {
             remove(selectedId);
             std::cout << "The shape is removed." << std::endl;
+        } else if (command == "edit") {
+            for (const auto& figure : figures) {
+                if (figure->id == selectedId) {
+                    if (figure->type == "rectangle") {
+                        int value1, value2;
+                        std::cin >> value1 >> value2;
+                        edit(selectedId, value1, value2);
+                    } else {
+                        int value;
+                        std::cin >> value;
+                        edit(selectedId, value);
+                    }
+                    std::cout << "The shape is modified." << std::endl;
+                    break;
+                }
+            }
         } else if (command == "clear") {
             figures.clear();
             board.clear();
