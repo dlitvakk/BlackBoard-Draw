@@ -1,5 +1,5 @@
 #include <iostream>
-#include <utility>
+#include <sstream>
 #include <vector>
 #include <fstream>
 
@@ -98,15 +98,36 @@ public:
     Figure(int id, std::string type, std::string mode, std::string color, const std::vector<int> &info, std::vector<std::vector <char>>& grid)
         : id(id), type(std::move(type)), mode(std::move(mode)), color(std::move(color)), info(info), grid(grid) {}
 
-    virtual void draw() {
-        std::cout << "Drawing non-existing shape!" << std::endl;
+    virtual void drawFrame() {
         std::cout << "  /\\_/\\\n";
         std::cout << " ( o.o )\n";
         std::cout << "  > ^ <\n";
     }
 
-    void getInfo() const { // !!!!!!!!
-        std::cout  << id << " " << type;
+    virtual void drawFill() {
+        std::cout << "0_0\n";
+    }
+
+     void draw() {
+        if (mode == "fill") {
+            drawFill();
+        } else if (mode == "frame") {
+            drawFrame();
+        } else {
+            std::cout << "Invalid mode!" << std::endl;
+        }
+    }
+
+    void getInfo() const {
+        std::cout << id << " ";
+        if (mode == "fill") {
+            std::cout << color << "-filled ";
+        } else {
+            std::cout << color << "-framed ";
+        }
+
+        std::cout << type;
+
         for (int i = 0; i < info.size(); ++i) {
             if (i == 0) {
                 std::cout << " (" << info[i];
@@ -126,7 +147,7 @@ public:
     Triangle(int id, std::string mode, std::string color, const std::vector<int> &info, std::vector<std::vector <char>>& grid)
         : Figure(id, "triangle", std::move(mode), std::move(color), info, grid) {}
 
-    void drawFrame () const {
+    void drawFrame () override {
         int x = info[0], y = info[1], height = info[2];
         if (height <= 0) return;
         for (int i = 0; i < height; ++i) {
@@ -152,7 +173,7 @@ public:
         }
     }
 
-    void drawFill() const {
+    void drawFill() override {
         int x = info[0], y = info[1], height = info[2];
         if (height <= 0) return;
         for (int i = 0; i < height; ++i) {
@@ -169,15 +190,6 @@ public:
             }
         }
     }
-    void draw() override {
-        if (mode == "fill") {
-            drawFill();
-        } else if (mode == "frame") {
-            drawFrame();
-        } else {
-            std::cout << "Invalid mode!" << std::endl;
-        }
-    }
 };
 
 class Rhombus : public Figure {
@@ -186,7 +198,7 @@ public:
     Rhombus(int id, std::string mode, std::string color, const std::vector<int> &info, std::vector<std::vector <char>>& grid)
         : Figure(id, "rhombus", std::move(mode), std::move(color), info, grid) {}
 
-    void drawFrame() const {
+    void drawFrame() override {
         int x = info[0], y = info[1], height = info[2];
         if (height <= 0) return;
         if (height % 2 != 0) {
@@ -220,7 +232,7 @@ public:
             }
         }
     }
-    void drawFill() const {
+    void drawFill() override {
         int x = info[0], y = info[1], height = info[2];
         if (height <= 0) return;
         if (height % 2 != 0) {
@@ -255,15 +267,6 @@ public:
             }
         }
     }
-    void draw() override {
-        if (mode == "fill") {
-            drawFill();
-        } else if (mode == "frame") {
-            drawFrame();
-        } else {
-            std::cout << "Invalid mode!" << std::endl;
-        }
-    }
 };
 
 class Circle : public Figure {
@@ -272,7 +275,7 @@ public:
     Circle(int id, std::string mode, std::string color, const std::vector<int> &info, std::vector<std::vector <char>>& grid)
         : Figure(id, "circle", std::move(mode), std::move(color), info, grid) {}
 
-    void drawFrame() const {
+    void drawFrame() override {
         int x = info[0], y = info[1], radius = info[2];
         if (radius <= 0) return;
         for (int i = -radius; i <= radius; ++i) {
@@ -293,7 +296,7 @@ public:
         }
     }
 
-    void drawFill() const {
+    void drawFill() override {
         int x = info[0], y = info[1], radius = info[2];
         if (radius <= 0) return;
         for (int i = -radius; i <= radius; ++i) {
@@ -312,16 +315,6 @@ public:
             }
         }
     }
-
-    void draw() override {
-        if (mode == "fill") {
-            drawFill();
-        } else if (mode == "frame") {
-            drawFrame();
-        } else {
-            std::cout << "Invalid mode!" << std::endl;
-        }
-    }
 };
 
 class Rectangle : public Figure {
@@ -330,7 +323,7 @@ public:
     Rectangle(int id, std::string mode, std::string color, const std::vector<int> &info, std::vector<std::vector <char>>& grid)
         : Figure(id, "rectangle", std::move(mode), std::move(color), info, grid) {}
 
-    void drawFrame() const {
+    void drawFrame() override {
         int x = info[0], y = info[1], width = info[2], height = info[3];
         if (width <= 0 || height <= 0) return;
 
@@ -359,7 +352,7 @@ public:
         }
     }
 
-    void drawFill() const {
+    void drawFill() override {
         int x = info[0], y = info[1], width = info[2], height = info[3];
         if (width <= 0 || height <= 0) return;
 
@@ -374,21 +367,13 @@ public:
             }
         }
     }
-    void draw() override {
-        if (mode == "fill") {
-            drawFill();
-        } else if (mode == "frame") {
-            drawFrame();
-        } else {
-            std::cout << "Invalid mode!" << std::endl;
-        }
-    }
 };
 
 class CommandParser {
     Board& board;
     static std::vector<std::unique_ptr<Figure>> figures;
     Board previousState;
+    int selectedId;
 
 public:
     explicit CommandParser(Board &board)
@@ -397,62 +382,86 @@ public:
 
     static void printShapes() {
         std::cout << "The list of possible shapes:" << std::endl;
-        std::cout << "triangle <x> <y> <height>" << std::endl;
-        std::cout << "rhombus <x> <y> <height>" << std::endl;
-        std::cout << "circle <x> <y> <radius>" << std::endl;
-        std::cout << "rectangle <x> <y> <width> <height>" << std::endl;
+        std::cout << "triangle frame/fill <color> <x> <y> <height>" << std::endl;
+        std::cout << "rhombus frame/fill <color> <x> <y> <height>" << std::endl;
+        std::cout << "circle frame/fill <color> <x> <y> <radius>" << std::endl;
+        std::cout << "rectangle frame/fill <color> <x> <y> <width> <height>" << std::endl;
+    }
+
+    void select(int id) {
+        selectedId = id;
+        for (const auto& figure : figures) {
+            if (figure->id == id) {
+                figure->getInfo();
+                break;
+            }
+        }
+    }
+
+    void select(const std::vector<int> &coordinates) {
+        for (const auto& figure : figures) {
+            std::vector<int> tempInfo = figure->info;
+            if (tempInfo[0] == coordinates[0] && tempInfo[1] == coordinates[1]) {
+                figure->getInfo();
+                selectedId = figure->id;
+                break;
+            }
+        }
+    }
+
+    static void remove(const int id) {
+        for (int i = 0; i < figures.size(); ++i) {
+            if (figures[i]->id == id) {
+                figures.erase(figures.begin() + i);
+                break;
+            }
+        }
     }
 
      void add(const std::string &type, const std::string &mode, const std::string &color, const std::vector<int>& info) const {
+        if (info[0] < 0 || info[0] >= BOARD_WIDTH || info[1] < 0 || info[1] >= BOARD_HEIGHT) {
+            std::cout << "The shape is out of scope. Try again!" << std::endl;
+            return;
+        }
+        for (const auto& figure: figures) {
+            if (figure->type == type && figure->info == info) {
+                std::cout << "The shape is already added!" << std::endl;
+                return;
+            }
+        }
+        if (type != "rectangle" && info.size() != 3) {
+            std::cout << "Invalid number of parameters for " << type << "!" << std::endl;
+            return;
+        }
         if (type == "triangle") {
             std::unique_ptr<Triangle> tr = std::make_unique<Triangle>(figures.size() + 1, mode, color, info, board.grid);
             figures.push_back(std::move(tr));
         } else if (type == "rhombus") {
+            if (info[2] % 2 != 0) {
+                std::cout << "Please, enter valid height for rhombus. Height should be even number." << std::endl;
+                return;
+            }
             std::unique_ptr<Rhombus> r = std::make_unique<Rhombus>(figures.size() + 1, mode, color, info, board.grid);
             figures.push_back(std::move(r));
         } else if (type == "circle") {
             std::unique_ptr<Circle> c = std::make_unique<Circle>(figures.size() + 1, mode, color, info, board.grid);
             figures.push_back(std::move(c));
         } else if (type == "rectangle") {
+            if (info.size() != 4) {
+                std::cout << "Invalid number of parameters for rectangle!" << std::endl;
+                return;
+            }
             std::unique_ptr<Rectangle> rec = std::make_unique<Rectangle>(figures.size() + 1, mode, color, info, board.grid);
             figures.push_back(std::move(rec));
         } else {
             std::cout << "Invalid shape type!" << std::endl;
         }
-    }
-
-    static bool validation(const std::string &type, const std::vector<int> &info) {
-        if (type != "triangle" && type != "rhombus" && type != "circle" && type != "rectangle") {
-            std::cout << "Invalid shape type!" << std::endl;
-            return false;
-        }
-        if (type == "rectangle" && info.size() != 4) {
-            std::cout << "Invalid number of parameters for rectangle!" << std::endl;
-            return false;
-        }
-        if (type != "rectangle" && info.size() != 3) {
-            std::cout << "Invalid number of parameters for " << type << "!" << std::endl;
-            return false;
-        }
-        if (type == "rhombus" && info[2] % 2 != 0) {
-            std::cout << "Please, enter valid height for rhombus. Height should be even number." << std::endl;
-            return false;
-        }
-        if (info[0] < 0 || info[0] >= BOARD_WIDTH || info[1] < 0 || info[1] >= BOARD_HEIGHT) {
-            std::cout << "The shape is out of scope. Try again!" << std::endl;
-            return false;
-        }
-        for (const auto& figure: figures) {
-            if (figure->type == type && figure->info == info) {
-                std::cout << "The shape is already added!" << std::endl;
-                return false;
-            }
-        }
-        return true;
+        std::cout << "Shape is succesfully added." << std::endl;
     }
 
      void parseCommand(const std::string& command) {
         if (command == "draw") {
+            board.clear();
             for (const auto& figure : figures) {
                 figure->draw();
             }
@@ -489,12 +498,20 @@ public:
 
                 }
             }
-            if (validation(type, info) == true) {
-                std::cout << "\033[32m";
-                add(type, mode, color, info);
-                std::cout << "\033[0m";
-                std::cout << "Shape is succesfully added." << std::endl;
+            add(type, mode, color, info);
+        } else if (command == "select") {
+            int value1, value2;
+            std::cin >> value1;
+            if (std::cin.peek() == EOF || std::cin.peek() == '\n') {
+                select(value1);
+            } else {
+                std::cin >> value2;
+                select({value1, value2});
             }
+
+        } else if (command == "remove") {
+            remove(selectedId);
+            std::cout << "The shape is removed." << std::endl;
         } else if (command == "clear") {
             figures.clear();
             board.clear();
