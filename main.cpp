@@ -440,6 +440,16 @@ public:
         }
     }
 
+    void move(const int id, const int x, const int y) {
+        for (const auto& figure : figures) {
+            if (figure->id == id) {
+                figure->info[0] = x;
+                figure->info[1] = y;
+                return;
+            }
+        }
+    }
+
      void add(const std::string &type, const std::string &mode, const std::string &color, const std::vector<int>& info) const {
         if (info[0] < 0 || info[0] >= BOARD_WIDTH || info[1] < 0 || info[1] >= BOARD_HEIGHT) {
             std::cout << "The shape is out of scope. Try again!" << std::endl;
@@ -538,18 +548,23 @@ public:
             for (const auto& figure : figures) {
                 if (figure->id == selectedId) {
                     if (figure->type == "rectangle") {
-                        int value1, value2;
-                        std::cin >> value1 >> value2;
-                        edit(selectedId, value1, value2);
+                        int param1, param2;
+                        std::cin >> param1 >> param2;
+                        edit(selectedId, param1, param2);
                     } else {
-                        int value;
-                        std::cin >> value;
-                        edit(selectedId, value);
+                        int param;
+                        std::cin >> param;
+                        edit(selectedId, param);
                     }
-                    std::cout << "The shape is modified." << std::endl;
+                    std::cout << "The shape is edited." << std::endl;
                     break;
                 }
             }
+        } else if (command == "move") {
+            int x, y;
+            std::cin >> x >> y;
+            move(selectedId, x, y);
+            std::cout << "The shape is succesfully moved to (" << x <<", " << y << ").\n";
         } else if (command == "clear") {
             figures.clear();
             board.clear();
