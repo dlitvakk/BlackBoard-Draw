@@ -148,6 +148,7 @@ public:
         : Figure(id, "triangle", std::move(mode), std::move(color), info, grid) {}
 
     void drawFrame () override {
+        char c = color[0];
         int x = info[0], y = info[1], height = info[2];
         if (height <= 0) return;
         for (int i = 0; i < height; ++i) {
@@ -157,10 +158,10 @@ public:
 
             if (posY < BOARD_HEIGHT) {
                 if (leftMost >= 0 && leftMost < BOARD_WIDTH) {
-                    grid[posY][leftMost] = '*';
+                    grid[posY][leftMost] = c;
                 }
                 if (rightMost >= 0 && rightMost < BOARD_WIDTH && leftMost != rightMost) {
-                    grid[posY][rightMost] = '*';
+                    grid[posY][rightMost] = c;
                 }
             }
         }
@@ -169,11 +170,12 @@ public:
             int baseX = x - height + 1 + j;
             int baseY = y + height - 1;
             if (baseX >= 0 && baseX < BOARD_WIDTH && baseY < BOARD_HEIGHT)
-                grid[baseY][baseX] = '*';
+                grid[baseY][baseX] = c;
         }
     }
 
     void drawFill() override {
+        char c = color[0];
         int x = info[0], y = info[1], height = info[2];
         if (height <= 0) return;
         for (int i = 0; i < height; ++i) {
@@ -184,7 +186,7 @@ public:
             if (posY < BOARD_HEIGHT) {
                 for (int j = leftMost; j <= rightMost; ++j) {
                     if (j >= 0 && j < BOARD_WIDTH) {
-                        grid[posY][j] = '*';
+                        grid[posY][j] = c;
                     }
                 }
             }
@@ -199,6 +201,7 @@ public:
         : Figure(id, "rhombus", std::move(mode), std::move(color), info, grid) {}
 
     void drawFrame() override {
+        char c = color[0];
         int x = info[0], y = info[1], height = info[2];
         if (height <= 0) return;
         if (height % 2 != 0) {
@@ -212,9 +215,9 @@ public:
 
             if (posY < BOARD_HEIGHT) {
                 if (leftMost >= 0 && leftMost < BOARD_WIDTH)
-                    grid[posY][leftMost] = '*';
+                    grid[posY][leftMost] = c;
                 if (rightMost >= 0 && rightMost < BOARD_WIDTH && leftMost != rightMost) {
-                    grid[posY][rightMost] = '*';
+                    grid[posY][rightMost] = c;
                 }
             }
         }
@@ -226,13 +229,14 @@ public:
 
             if (posY < BOARD_HEIGHT) {
                 if (leftMost >= 0 && leftMost < BOARD_WIDTH)
-                    grid[posY][leftMost] = '*';
+                    grid[posY][leftMost] = c;
                 if (rightMost >= 0 && rightMost < BOARD_WIDTH && leftMost != rightMost)
-                    grid[posY][rightMost] = '*';
+                    grid[posY][rightMost] = c;
             }
         }
     }
     void drawFill() override {
+        char c = color[0];
         int x = info[0], y = info[1], height = info[2];
         if (height <= 0) return;
         if (height % 2 != 0) {
@@ -247,7 +251,7 @@ public:
             if (posY < BOARD_HEIGHT) {
                 for (int j = leftMost; j <= rightMost; ++j) {
                     if (j >= 0 && j < BOARD_WIDTH) {
-                        grid[posY][j] = '*';
+                        grid[posY][j] = c;
                     }
                 }
             }
@@ -261,7 +265,7 @@ public:
             if (posY < BOARD_HEIGHT) {
                 for (int j = leftMost; j <= rightMost; ++j) {
                     if (j >= 0 && j < BOARD_WIDTH) {
-                        grid[posY][j] = '*';
+                        grid[posY][j] = c;
                     }
                 }
             }
@@ -276,6 +280,7 @@ public:
         : Figure(id, "circle", std::move(mode), std::move(color), info, grid) {}
 
     void drawFrame() override {
+        char c = color[0];
         int x = info[0], y = info[1], radius = info[2];
         if (radius <= 0) return;
         for (int i = -radius; i <= radius; ++i) {
@@ -287,16 +292,17 @@ public:
 
             if (posY >= 0 && posY < BOARD_HEIGHT) {
                 if (posX1 >= 0 && posX1 < BOARD_WIDTH) {
-                    grid[posY][posX1] = '*';
+                    grid[posY][posX1] = c;
                 }
                 if (posX2 >= 0 && posX2 < BOARD_WIDTH) {
-                    grid[posY][posX2] = '*';
+                    grid[posY][posX2] = c;
                 }
             }
         }
     }
 
     void drawFill() override {
+        char c = color[0];
         int x = info[0], y = info[1], radius = info[2];
         if (radius <= 0) return;
         for (int i = -radius; i <= radius; ++i) {
@@ -309,7 +315,7 @@ public:
             if (posY >= 0 && posY < BOARD_HEIGHT) {
                 for (int j = posX2; j <= posX1; ++j) {
                     if (j >= 0 && j < BOARD_WIDTH) {
-                        grid[posY][j] = '*';
+                        grid[posY][j] = c;
                     }
                 }
             }
@@ -324,6 +330,7 @@ public:
         : Figure(id, "rectangle", std::move(mode), std::move(color), info, grid) {}
 
     void drawFrame() override {
+        char c = color[0];
         int x = info[0], y = info[1], width = info[2], height = info[3];
         if (width <= 0 || height <= 0) return;
 
@@ -331,10 +338,10 @@ public:
             int posX = x + i;
             if (posX >= 0 && posX < BOARD_WIDTH) {
                 if (y >= 0 && y < BOARD_HEIGHT) {
-                    grid[y][posX] = '*';
+                    grid[y][posX] = c;
                 }
                 if (y + height - 1 >= 0 && y + height - 1 < BOARD_HEIGHT) {
-                    grid[y + height - 1][posX] = '*';
+                    grid[y + height - 1][posX] = c;
                 }
             }
         }
@@ -343,16 +350,17 @@ public:
             int posY = y + i;
             if (posY >= 0 && posY < BOARD_HEIGHT) {
                 if (x >= 0 && x < BOARD_WIDTH) {
-                    grid[posY][x] = '*';
+                    grid[posY][x] = c;
                 }
                 if (x + width - 1 >= 0 && x + width - 1 < BOARD_WIDTH) {
-                    grid[posY][x + width - 1] = '*';
+                    grid[posY][x + width - 1] = c;
                 }
             }
         }
     }
 
     void drawFill() override {
+        char c = color[0];
         int x = info[0], y = info[1], width = info[2], height = info[3];
         if (width <= 0 || height <= 0) return;
 
@@ -361,7 +369,7 @@ public:
             if (posX >= 0 && posX < BOARD_WIDTH) {
                 for (int j = y; j < y + height; ++j) {
                     if (j >= 0 && j < BOARD_HEIGHT) {
-                        grid[j][posX] = '*';
+                        grid[j][posX] = c;
                     }
                 }
             }
@@ -418,9 +426,6 @@ public:
         }
     }
 
-    // The selected shape is modified
-    // You cannot change the shape type
-    // You cannot make a valid shape an invalid
     void edit(const int id, const int param) {
         for (const auto& figure : figures) {
             if (figure->id == id) {
@@ -445,6 +450,15 @@ public:
             if (figure->id == id) {
                 figure->info[0] = x;
                 figure->info[1] = y;
+                return;
+            }
+        }
+    }
+
+    void paint(const int id, const std::string& color) {
+        for (const auto& figure : figures) {
+            if (figure->id == id) {
+                figure->color = color;
                 return;
             }
         }
@@ -565,6 +579,11 @@ public:
             std::cin >> x >> y;
             move(selectedId, x, y);
             std::cout << "The shape is succesfully moved to (" << x <<", " << y << ").\n";
+        } else if(command == "paint") {
+            std::string colorChange;
+            std::cin >> colorChange;
+            paint(selectedId, colorChange);
+            std::cout << "The shape is painted to " << colorChange << std::endl;
         } else if (command == "clear") {
             figures.clear();
             board.clear();
